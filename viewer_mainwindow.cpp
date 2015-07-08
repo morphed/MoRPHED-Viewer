@@ -12,3 +12,8 @@ Viewer_MainWindow::~Viewer_MainWindow()
 {
     delete ui;
 }
+
+void Viewer_MainWindow::on_actionOpen_triggered()
+{
+
+}
