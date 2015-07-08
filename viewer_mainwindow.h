@@ -29,6 +29,12 @@ public:
 private slots:
     void on_actionOpen_triggered();
 
+    void on_spinInt_event_valueChanged(int arg1);
+
+    void on_tbtn_prev_clicked();
+
+    void on_tbtn_next_clicked();
+
 signals:
 
 private:

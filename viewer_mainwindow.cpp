@@ -6,6 +6,9 @@ Viewer_MainWindow::Viewer_MainWindow(QWidget *parent) :
     ui(new Ui::Viewer_MainWindow)
 {
     ui->setupUi(this);
+
+    m_nEvents = 0;
+    m_nCurrentEvent = 0;
 }
 
 Viewer_MainWindow::~Viewer_MainWindow()
@@ -16,7 +19,8 @@ Viewer_MainWindow::~Viewer_MainWindow()
 void Viewer_MainWindow::updateNumEvents(int nEvents)
 {
     m_nEvents = nEvents;
-    ui->lbl_floods->setText(QString::number(m_nEvents));
+    ui->spinInt_event->setMaximum(nEvents);
+    ui->lbl_events->setText(QString::number(m_nEvents));
 }
 
 int Viewer_MainWindow::loadXML()
@@ -80,5 +84,32 @@ void Viewer_MainWindow::on_actionOpen_triggered()
     {
         setXmlFilename(filename);
         loadXML();
+        m_nCurrentEvent = 0;
+    }
+}
+
+void Viewer_MainWindow::on_spinInt_event_valueChanged(int arg1)
+{
+    m_nCurrentEvent = arg1;
+    readEventData();
+}
+
+void Viewer_MainWindow::on_tbtn_prev_clicked()
+{
+    if (m_nCurrentEvent > 0)
+    {
+        m_nCurrentEvent--;
+        ui->spinInt_event->setValue(m_nCurrentEvent);
+        ui->spinInt_event->valueChanged(m_nCurrentEvent);
+    }
+}
+
+void Viewer_MainWindow::on_tbtn_next_clicked()
+{
+    if (m_nCurrentEvent < m_nEvents)
+    {
+        m_nCurrentEvent++;
+        ui->spinInt_event->setValue(m_nCurrentEvent);
+        ui->spinInt_event->valueChanged(m_nCurrentEvent);
     }
 }
