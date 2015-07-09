@@ -13,6 +13,7 @@ public:
     void addDepth();
     void addDoD();
     void addHlsd();
+    void align(int nUsBound);
     void clearScene();
     void loadGraphicsItems(QVector<QString> pngPaths);
     void loadScene();

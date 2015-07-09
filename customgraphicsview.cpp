@@ -21,6 +21,26 @@ void CustomGraphicsView::addHlsd()
     m_scene->addItem(m_qgHlsd);
 }
 
+void CustomGraphicsView::align(int nUsBound)
+{
+    if (nUsBound == 1)
+    {
+        rotate(270);
+    }
+    else if (nUsBound == 2)
+    {
+        rotate(90);
+    }
+    else if (nUsBound == 3)
+    {
+
+    }
+    else if (nUsBound == 4)
+    {
+        rotate(180);
+    }
+}
+
 void CustomGraphicsView::clearScene()
 {
     m_scene->clear();

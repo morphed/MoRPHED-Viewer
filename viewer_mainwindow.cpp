@@ -65,7 +65,7 @@ void Viewer_MainWindow::readEventData(int nEvent)
     for  (int i=0; i<m_qvPngPaths.size(); i++)
     {
         QFileInfo fi(m_qvPngPaths[i]);
-        if (!fi.exists())
+        if (!fi.exists() && m_nCurrentEvent != 0)
         {
             QMessageBox::information(this, "File not found", "File not found!\n" + m_qvPngPaths[i] + "\nThis file does not exist at this location");
         }
