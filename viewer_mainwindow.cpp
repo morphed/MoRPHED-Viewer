@@ -57,8 +57,8 @@ void Viewer_MainWindow::readEventData(int nEvent)
     m_qvTotalVols.append(m_xmlDoc.readNodeData(eventName, "BedErosion", "Total").toDouble());
     m_qvEventVols.append(m_xmlDoc.readNodeData(eventName, "BedDeposition", "Event").toDouble());
     m_qvTotalVols.append(m_xmlDoc.readNodeData(eventName, "BedDeposition", "Total").toDouble());
-    m_qvEventVols.append(m_xmlDoc.readNodeData(eventName, "BankErosion", "Event").toDouble());
-    m_qvTotalVols.append(m_xmlDoc.readNodeData(eventName, "BankErosion", "Total").toDouble());
+    m_qvEventVols.append(fabs(m_xmlDoc.readNodeData(eventName, "BankErosion", "Event").toDouble()));
+    m_qvTotalVols.append(fabs(m_xmlDoc.readNodeData(eventName, "BankErosion", "Total").toDouble()));
     m_qvEventVols.append(m_xmlDoc.readNodeData(eventName, "BankDeposition", "Event").toDouble());
     m_qvTotalVols.append(m_xmlDoc.readNodeData(eventName, "BankDeposition", "Total").toDouble());
 
@@ -78,6 +78,8 @@ void Viewer_MainWindow::setupPlots()
     m_qvBarNames << "Export" << "Import" << "Bed Ero."<< "Bed Depo." << "Bank Ero." << "Bank Depo.";
 
     //event plot
+    ui->plot_event->plotLayout()->insertRow(0);
+    ui->plot_event->plotLayout()->addElement(0, 0, new QCPPlotTitle(ui->plot_event, "Event Volume"));
     ui->plot_event->xAxis->setAutoTicks(false);
     ui->plot_event->xAxis->setAutoTickLabels(false);
     ui->plot_event->xAxis->setTickVector(m_qvBarTicks);
@@ -88,6 +90,8 @@ void Viewer_MainWindow::setupPlots()
     ui->plot_event->xAxis->setRange(0, 7);
 
     //total plot
+    ui->plot_total->plotLayout()->insertRow(0);
+    ui->plot_total->plotLayout()->addElement(0, 0, new QCPPlotTitle(ui->plot_total, "Total Volume"));
     ui->plot_total->xAxis->setAutoTicks(false);
     ui->plot_total->xAxis->setAutoTickLabels(false);
     ui->plot_total->xAxis->setTickVector(m_qvBarTicks);
@@ -118,18 +122,18 @@ int Viewer_MainWindow::updatePlots()
     ui->plot_event->addPlottable(volEvent);
     QPen pen;
     pen.setWidthF(1.2);
-    pen.setColor(QColor(1, 92, 191));
+    pen.setColor(QColor(255, 131, 0));
     volEvent->setPen(pen);
-    volEvent->setBrush(QColor(1, 92, 191));
+    volEvent->setBrush(QColor(255, 131, 0));
     volEvent->setData(m_qvBarTicks, m_qvEventVols);
     ui->plot_event->yAxis->setRange(0, (eventMax + eventMax * 0.05));
 
     QCPBars *volTotal = new QCPBars(ui->plot_total->xAxis, ui->plot_total->yAxis);
     ui->plot_total->addPlottable(volTotal);
     pen.setWidthF(1.2);
-    pen.setColor(QColor(1, 92, 191));
+    pen.setColor(QColor(255, 131, 0));
     volTotal->setPen(pen);
-    volTotal->setBrush(QColor(1, 92, 191));
+    volTotal->setBrush(QColor(255, 131, 0));
     volTotal->setData(m_qvBarTicks, m_qvTotalVols);
     ui->plot_total->yAxis->setRange(0, (totalMax + totalMax * 0.05));
 
