@@ -24,8 +24,12 @@ public:
     int loadXML();
     void readEventData();
     void readEventData(int nEvent);
+    void setupPlots();
     int setXmlFilename(QString filename);
+    int updatePlots();
     int updateView();
+
+    static double findMaxVector(QVector<double> vector);
 
 private slots:
     void on_actionOpen_triggered();
@@ -44,8 +48,8 @@ private:
     QString m_xmlFilename;
     XMLReadWrite m_xmlDoc;
     int m_nEvents, m_nCurrentEvent;
-    QVector<double> m_qvEventVols, m_qvTotalVols;
-    QVector<QString> m_qvPngPaths;
+    QVector<double> m_qvEventVols, m_qvTotalVols, m_qvBarTicks;
+    QVector<QString> m_qvPngPaths, m_qvBarNames;
 };
 
 #endif // VIEWER_MAINWINDOW_H

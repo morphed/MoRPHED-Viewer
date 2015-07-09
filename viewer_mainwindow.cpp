@@ -9,6 +9,7 @@ Viewer_MainWindow::Viewer_MainWindow(QWidget *parent) :
 
     m_nEvents = 0;
     m_nCurrentEvent = 0;
+    setupPlots();
 }
 
 Viewer_MainWindow::~Viewer_MainWindow()
@@ -71,6 +72,32 @@ void Viewer_MainWindow::readEventData(int nEvent)
     }
 }
 
+void Viewer_MainWindow::setupPlots()
+{
+    m_qvBarTicks << 1 << 2 << 3 << 4 << 5 << 6;
+    m_qvBarNames << "Export" << "Import" << "Bed Ero."<< "Bed Depo." << "Bank Ero." << "Bank Depo.";
+
+    //event plot
+    ui->plot_event->xAxis->setAutoTicks(false);
+    ui->plot_event->xAxis->setAutoTickLabels(false);
+    ui->plot_event->xAxis->setTickVector(m_qvBarTicks);
+    ui->plot_event->xAxis->setTickVectorLabels(m_qvBarNames);
+    ui->plot_event->xAxis->setTickLabelRotation(60);
+    ui->plot_event->xAxis->setSubTickCount(0);
+    ui->plot_event->xAxis->setTickLength(0, 4);
+    ui->plot_event->xAxis->setRange(0, 7);
+
+    //total plot
+    ui->plot_total->xAxis->setAutoTicks(false);
+    ui->plot_total->xAxis->setAutoTickLabels(false);
+    ui->plot_total->xAxis->setTickVector(m_qvBarTicks);
+    ui->plot_total->xAxis->setTickVectorLabels(m_qvBarNames);
+    ui->plot_total->xAxis->setTickLabelRotation(60);
+    ui->plot_total->xAxis->setSubTickCount(0);
+    ui->plot_total->xAxis->setTickLength(0, 4);
+    ui->plot_total->xAxis->setRange(0, 7);
+}
+
 int Viewer_MainWindow::setXmlFilename(QString filename)
 {
     m_xmlFilename = filename;
@@ -78,12 +105,49 @@ int Viewer_MainWindow::setXmlFilename(QString filename)
     return PROCESS_OK;
 }
 
+int Viewer_MainWindow::updatePlots()
+{
+    double eventMax, totalMax;
+    eventMax = findMaxVector(m_qvEventVols);
+    totalMax = findMaxVector(m_qvTotalVols);
+
+    ui->plot_event->clearPlottables();
+    ui->plot_total->clearPlottables();
+
+    QCPBars *volEvent = new QCPBars(ui->plot_event->xAxis, ui->plot_event->yAxis);
+    ui->plot_event->addPlottable(volEvent);
+    QPen pen;
+    pen.setWidthF(1.2);
+    pen.setColor(QColor(1, 92, 191));
+    volEvent->setPen(pen);
+    volEvent->setBrush(QColor(1, 92, 191));
+    volEvent->setData(m_qvBarTicks, m_qvEventVols);
+    ui->plot_event->yAxis->setRange(0, (eventMax + eventMax * 0.05));
+
+    QCPBars *volTotal = new QCPBars(ui->plot_total->xAxis, ui->plot_total->yAxis);
+    ui->plot_total->addPlottable(volTotal);
+    pen.setWidthF(1.2);
+    pen.setColor(QColor(1, 92, 191));
+    volTotal->setPen(pen);
+    volTotal->setBrush(QColor(1, 92, 191));
+    volTotal->setData(m_qvBarTicks, m_qvTotalVols);
+    ui->plot_total->yAxis->setRange(0, (totalMax + totalMax * 0.05));
+
+    ui->plot_event->replot();
+    ui->plot_event->update();
+    ui->plot_event->repaint();
+
+    ui->plot_total->replot();
+    ui->plot_total->update();
+    ui->plot_total->repaint();
+
+    return PROCESS_OK;
+}
+
 int Viewer_MainWindow::updateView()
 {
     ui->gv_main->clearScene();
-    qDebug()<<"scene cleared";
     ui->gv_main->loadGraphicsItems(m_qvPngPaths);
-    qDebug()<<"graphics loaded";
 
     if (ui->chbx_hlsd->isChecked())
     {
@@ -97,11 +161,32 @@ int Viewer_MainWindow::updateView()
     {
         ui->gv_main->addDoD();
     }
-    qDebug()<<"graphics added";
 
     ui->gv_main->loadScene();
 
     return PROCESS_OK;
+}
+
+double Viewer_MainWindow::findMaxVector(QVector<double> vector)
+{
+    double max =0;
+
+    for (int i=0; i<vector.size(); i++)
+    {
+        if (i == 0)
+        {
+            max = vector[i];
+        }
+
+        else
+        {
+            if (max < vector[i])
+            {
+                max = vector[i];
+            }
+        }
+    }
+    return max;
 }
 
 void Viewer_MainWindow::on_actionOpen_triggered()
@@ -127,8 +212,8 @@ void Viewer_MainWindow::on_spinInt_event_valueChanged(int arg1)
 {
     m_nCurrentEvent = arg1;
     readEventData();
-    qDebug()<<"data read";
     updateView();
+    updatePlots();
 }
 
 void Viewer_MainWindow::on_tbtn_prev_clicked()
