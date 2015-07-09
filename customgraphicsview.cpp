@@ -62,6 +62,21 @@ void CustomGraphicsView::loadScene()
     setScene(m_scene);
 }
 
+void CustomGraphicsView::removeDepth()
+{
+    m_scene->removeItem(m_qgDepth);
+}
+
+void CustomGraphicsView::removeDoD()
+{
+    m_scene->removeItem(m_qgDod);
+}
+
+void CustomGraphicsView::removeHlsd()
+{
+    m_scene->removeItem(m_qgHlsd);
+}
+
 void CustomGraphicsView::wheelEvent(QWheelEvent *event)
 {
     setTransformationAnchor(QGraphicsView::AnchorUnderMouse);

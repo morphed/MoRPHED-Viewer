@@ -17,6 +17,9 @@ public:
     void clearScene();
     void loadGraphicsItems(QVector<QString> pngPaths);
     void loadScene();
+    void removeDepth();
+    void removeDoD();
+    void removeHlsd();
 
 protected:
     virtual void wheelEvent(QWheelEvent *event);

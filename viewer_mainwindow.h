@@ -24,6 +24,7 @@ public:
     int loadXML();
     void readEventData();
     void readEventData(int nEvent);
+    void setupGUI();
     void setupPlots();
     int setXmlFilename(QString filename);
     int updatePlots();
@@ -40,6 +41,12 @@ private slots:
 
     void on_tbtn_next_clicked();
 
+    void on_chbx_dod_stateChanged(int arg1);
+
+    void on_chbx_depth_stateChanged(int arg1);
+
+    void on_chbx_hlsd_stateChanged(int arg1);
+
 signals:
 
 private:
@@ -47,9 +54,9 @@ private:
 
     QString m_xmlFilename;
     XMLReadWrite m_xmlDoc;
-    int m_nEvents, m_nCurrentEvent;
+    int m_nEvents, m_nCurrentEvent, m_nUsBound;
     QVector<double> m_qvEventVols, m_qvTotalVols, m_qvBarTicks;
-    QVector<QString> m_qvPngPaths, m_qvBarNames;
+    QVector<QString> m_qvPngPaths, m_qvBarNames, m_qvLegendPaths;
 };
 
 #endif // VIEWER_MAINWINDOW_H

@@ -9,6 +9,7 @@ Viewer_MainWindow::Viewer_MainWindow(QWidget *parent) :
 
     m_nEvents = 0;
     m_nCurrentEvent = 0;
+    setupGUI();
     setupPlots();
 }
 
@@ -62,6 +63,7 @@ void Viewer_MainWindow::readEventData(int nEvent)
     m_qvEventVols.append(m_xmlDoc.readNodeData(eventName, "BankDeposition", "Event").toDouble());
     m_qvTotalVols.append(m_xmlDoc.readNodeData(eventName, "BankDeposition", "Total").toDouble());
 
+    m_qvLegendPaths.resize(3);
     for  (int i=0; i<m_qvPngPaths.size(); i++)
     {
         QFileInfo fi(m_qvPngPaths[i]);
@@ -69,7 +71,20 @@ void Viewer_MainWindow::readEventData(int nEvent)
         {
             QMessageBox::information(this, "File not found", "File not found!\n" + m_qvPngPaths[i] + "\nThis file does not exist at this location");
         }
+        else
+        {
+            QString base = fi.baseName() + "_legend.png";
+            QString path = fi.absolutePath();
+            m_qvLegendPaths[i] = path + "/" + base;
+        }
     }
+}
+
+void Viewer_MainWindow::setupGUI()
+{
+    ui->chbx_hlsd->setChecked(true);
+    ui->chbx_depth->setChecked(true);
+    ui->chbx_dod->setChecked(true);
 }
 
 void Viewer_MainWindow::setupPlots()
@@ -168,6 +183,12 @@ int Viewer_MainWindow::updateView()
 
     ui->gv_main->loadScene();
 
+    qDebug()<<"loading legend";
+    QImage legendImage;
+    legendImage.load(m_qvLegendPaths[2]);
+    ui->lbl_legend->setPixmap(QPixmap::fromImage(legendImage));
+    qDebug()<<"legend done "<<m_qvLegendPaths[2];
+
     return PROCESS_OK;
 }
 
@@ -209,6 +230,8 @@ void Viewer_MainWindow::on_actionOpen_triggered()
         setXmlFilename(filename);
         loadXML();
         m_nCurrentEvent = 0;
+        m_nUsBound = m_xmlDoc.readNodeData("USBound").toInt();
+        ui->gv_main->align(m_nUsBound);
     }
 }
 
@@ -226,7 +249,6 @@ void Viewer_MainWindow::on_tbtn_prev_clicked()
     {
         m_nCurrentEvent--;
         ui->spinInt_event->setValue(m_nCurrentEvent);
-        ui->spinInt_event->valueChanged(m_nCurrentEvent);
     }
 }
 
@@ -236,6 +258,65 @@ void Viewer_MainWindow::on_tbtn_next_clicked()
     {
         m_nCurrentEvent++;
         ui->spinInt_event->setValue(m_nCurrentEvent);
-        ui->spinInt_event->valueChanged(m_nCurrentEvent);
     }
+}
+
+void Viewer_MainWindow::on_chbx_dod_stateChanged(int arg1)
+{
+    if (arg1 == 0)
+    {
+        //unchecked
+        ui->gv_main->removeDoD();
+    }
+    else if (arg1 == 1)
+    {
+        //partially checked
+    }
+    else if (arg1 == 2)
+    {
+        //checked
+        ui->gv_main->addDoD();
+    }
+
+    ui->gv_main->loadScene();
+}
+
+void Viewer_MainWindow::on_chbx_depth_stateChanged(int arg1)
+{
+    if (arg1 == 0)
+    {
+        //unchecked
+        ui->gv_main->removeDepth();
+    }
+    else if (arg1 == 1)
+    {
+        //partially checked
+    }
+    else if (arg1 == 2)
+    {
+        //checked
+        ui->gv_main->addDepth();
+    }
+
+    ui->gv_main->loadScene();
+}
+
+void Viewer_MainWindow::on_chbx_hlsd_stateChanged(int arg1)
+{
+    if (arg1 == 0)
+    {
+        //unchecked
+        ui->gv_main->removeHlsd();
+    }
+    else if (arg1 == 1)
+    {
+        //partially checked
+    }
+    else if (arg1 == 2)
+    {
+        //checked
+        ui->gv_main->addHlsd();
+    }
+
+    ui->gv_main->loadScene();
 }

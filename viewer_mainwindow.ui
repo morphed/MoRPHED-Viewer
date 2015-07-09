@@ -17,10 +17,10 @@
    <widget class="CustomGraphicsView" name="gv_main" native="true">
     <property name="geometry">
      <rect>
-      <x>240</x>
-      <y>20</y>
-      <width>871</width>
-      <height>431</height>
+      <x>260</x>
+      <y>10</y>
+      <width>851</width>
+      <height>441</height>
      </rect>
     </property>
    </widget>
@@ -57,8 +57,8 @@
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>40</x>
-      <y>50</y>
+      <x>10</x>
+      <y>10</y>
       <width>87</width>
       <height>65</height>
      </rect>
@@ -146,6 +146,22 @@
       </widget>
      </item>
     </layout>
+   </widget>
+   <widget class="QLabel" name="lbl_legend">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>10</y>
+      <width>121</width>
+      <height>401</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
