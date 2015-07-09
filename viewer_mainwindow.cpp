@@ -60,11 +60,46 @@ void Viewer_MainWindow::readEventData(int nEvent)
     m_qvTotalVols.append(m_xmlDoc.readNodeData(eventName, "BankErosion", "Total").toDouble());
     m_qvEventVols.append(m_xmlDoc.readNodeData(eventName, "BankDeposition", "Event").toDouble());
     m_qvTotalVols.append(m_xmlDoc.readNodeData(eventName, "BankDeposition", "Total").toDouble());
+
+    for  (int i=0; i<m_qvPngPaths.size(); i++)
+    {
+        QFileInfo fi(m_qvPngPaths[i]);
+        if (!fi.exists())
+        {
+            QMessageBox::information(this, "File not found", "File not found!\n" + m_qvPngPaths[i] + "\nThis file does not exist at this location");
+        }
+    }
 }
 
 int Viewer_MainWindow::setXmlFilename(QString filename)
 {
     m_xmlFilename = filename;
+
+    return PROCESS_OK;
+}
+
+int Viewer_MainWindow::updateView()
+{
+    ui->gv_main->clearScene();
+    qDebug()<<"scene cleared";
+    ui->gv_main->loadGraphicsItems(m_qvPngPaths);
+    qDebug()<<"graphics loaded";
+
+    if (ui->chbx_hlsd->isChecked())
+    {
+        ui->gv_main->addHlsd();
+    }
+    if (ui->chbx_depth->isChecked())
+    {
+        ui->gv_main->addDepth();
+    }
+    if (ui->chbx_dod->isChecked())
+    {
+        ui->gv_main->addDoD();
+    }
+    qDebug()<<"graphics added";
+
+    ui->gv_main->loadScene();
 
     return PROCESS_OK;
 }
@@ -92,6 +127,8 @@ void Viewer_MainWindow::on_spinInt_event_valueChanged(int arg1)
 {
     m_nCurrentEvent = arg1;
     readEventData();
+    qDebug()<<"data read";
+    updateView();
 }
 
 void Viewer_MainWindow::on_tbtn_prev_clicked()

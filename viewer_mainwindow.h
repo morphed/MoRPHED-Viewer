@@ -25,6 +25,7 @@ public:
     void readEventData();
     void readEventData(int nEvent);
     int setXmlFilename(QString filename);
+    int updateView();
 
 private slots:
     void on_actionOpen_triggered();
