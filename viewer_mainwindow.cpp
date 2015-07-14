@@ -199,10 +199,21 @@ void Viewer_MainWindow::setupHydroPlot()
     ui->plot_hydro->yAxis->setAutoTickStep(true);
 
     maxQ = findMaxVector(m_qvDischarge);
+    m_qvDisMax.resize(2), m_qvDateCurrent.resize(2);
+    m_qvDisMax[0] = 0, m_qvDisMax[1] = maxQ + 20;
+    m_qvDateCurrent[0] = 0, m_qvDateCurrent[1] = 0;
 
     ui->plot_hydro->yAxis->setRange(0, maxQ + (maxQ * 0.05));
+
+    ui->plot_hydro->addGraph();
+    ui->plot_hydro->graph(1)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssNone));
+    ui->plot_hydro->graph(1)->setLineStyle(QCPGraph::lsLine);
+    ui->plot_hydro->graph(1)->setPen(QPen(Qt::red));
+    ui->plot_hydro->graph(1)->setData(m_qvDateCurrent, m_qvDisMax);
+
     ui->plot_hydro->replot();
     ui->plot_hydro->update();
+    ui->plot_hydro->repaint();
 }
 
 int Viewer_MainWindow::setXmlFilename(QString filename)
@@ -277,6 +288,12 @@ int Viewer_MainWindow::updatePlots()
     volTotal->setBrush(QColor(255, 131, 0));
     volTotal->setData(m_qvBarTicks, m_qvTotalVols);
     ui->plot_total->yAxis->setRange(0, (totalMax + totalMax * 0.05));
+
+    ui->plot_hydro->graph(1)->setData(m_qvDateCurrent, m_qvDisMax);
+
+    ui->plot_hydro->replot();
+    ui->plot_hydro->update();
+    ui->plot_hydro->repaint();
 
     ui->plot_event->replot();
     ui->plot_event->update();
@@ -367,6 +384,14 @@ void Viewer_MainWindow::on_actionOpen_triggered()
 void Viewer_MainWindow::on_spinInt_event_valueChanged(int arg1)
 {
     m_nCurrentEvent = arg1;
+    if (arg1 > 0)
+    {
+        m_qvDateCurrent[0] = m_qvDates[arg1-1], m_qvDateCurrent[1] = m_qvDates[arg1-1];
+    }
+    else
+    {
+        m_qvDateCurrent[0] = 0, m_qvDateCurrent[1] = 0;
+    }
     readEventData();
     updateView();
     updatePlots();

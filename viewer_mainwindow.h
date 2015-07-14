@@ -61,7 +61,7 @@ private:
     QString m_xmlFilename, m_qsHydro;
     XMLReadWrite m_xmlDoc;
     int m_nEvents, m_nCurrentEvent, m_nUsBound;
-    QVector<double> m_qvEventVols, m_qvTotalVols, m_qvBarTicks, m_qvDischarge, m_qvSediment, m_qvDates;
+    QVector<double> m_qvEventVols, m_qvTotalVols, m_qvBarTicks, m_qvDischarge, m_qvSediment, m_qvDates, m_qvDateCurrent, m_qvDisMax;
     QVector<QString> m_qvPngPaths, m_qvBarNames, m_qvLegendPaths;
 };
 
