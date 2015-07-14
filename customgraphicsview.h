@@ -11,14 +11,17 @@ public:
     CustomGraphicsView(QWidget* parent=0);
 
     void addDepth();
-    void addDoD();
+    void addDoDEvent();
+    void addDoDTotal();
     void addHlsd();
     void align(int nUsBound);
     void clearScene();
     void loadGraphicsItems(QVector<QString> pngPaths);
     void loadScene();
+    void removeAllLayers();
     void removeDepth();
-    void removeDoD();
+    void removeDoDEvent();
+    void removeDoDTotal();
     void removeHlsd();
 
 protected:
@@ -26,7 +29,7 @@ protected:
 
 private:
     QGraphicsScene *m_scene;
-    QGraphicsItem *m_qgDepth, *m_qgDod, *m_qgHlsd;
+    QGraphicsItem *m_qgDepth, *m_qgDodEvent, *m_qgDodTotal, *m_qgHlsd;
 
 };
 

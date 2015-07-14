@@ -11,9 +11,14 @@ void CustomGraphicsView::addDepth()
     m_scene->addItem(m_qgDepth);
 }
 
-void CustomGraphicsView::addDoD()
+void CustomGraphicsView::addDoDEvent()
 {
-    m_scene->addItem(m_qgDod);
+    m_scene->addItem(m_qgDodEvent);
+}
+
+void CustomGraphicsView::addDoDTotal()
+{
+    m_scene->addItem(m_qgDodTotal);
 }
 
 void CustomGraphicsView::addHlsd()
@@ -54,7 +59,9 @@ void CustomGraphicsView::loadGraphicsItems(QVector<QString> pngPaths)
     image = QImage(pngPaths[1]);
     m_qgDepth = new QGraphicsPixmapItem(QPixmap::fromImage(image));
     image = QImage(pngPaths[2]);
-    m_qgDod = new QGraphicsPixmapItem(QPixmap::fromImage(image));
+    m_qgDodEvent = new QGraphicsPixmapItem(QPixmap::fromImage(image));
+    image = QImage(pngPaths[3]);
+    m_qgDodTotal = new QGraphicsPixmapItem(QPixmap::fromImage(image));
 }
 
 void CustomGraphicsView::loadScene()
@@ -62,14 +69,27 @@ void CustomGraphicsView::loadScene()
     setScene(m_scene);
 }
 
+void CustomGraphicsView::removeAllLayers()
+{
+    removeDepth();
+    removeDoDEvent();
+    removeDoDTotal();
+    removeHlsd();
+}
+
 void CustomGraphicsView::removeDepth()
 {
     m_scene->removeItem(m_qgDepth);
 }
 
-void CustomGraphicsView::removeDoD()
+void CustomGraphicsView::removeDoDEvent()
 {
-    m_scene->removeItem(m_qgDod);
+    m_scene->removeItem(m_qgDodEvent);
+}
+
+void CustomGraphicsView::removeDoDTotal()
+{
+    m_scene->removeItem(m_qgDodTotal);
 }
 
 void CustomGraphicsView::removeHlsd()

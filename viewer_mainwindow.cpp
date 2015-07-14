@@ -25,10 +25,50 @@ void Viewer_MainWindow::updateNumEvents(int nEvents)
     ui->lbl_events->setText(QString::number(m_nEvents));
 }
 
+int Viewer_MainWindow::loadInputText()
+{
+    m_qvDates.clear();
+    m_qvDischarge.clear();
+    m_qvSediment.clear();
+
+    //declare temp variables to hold stream data
+    QString qsDate, qsQ, qsDSWE, qsImport;
+    QDateTime tempDate;
+    int count = 0;
+
+    //load file
+    qDebug()<<m_qsHydro;
+    QFile in(m_qsHydro);
+    if (in.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        QTextStream stream(&in);
+        while (!stream.atEnd())
+        {
+            //read elements from stream to temp variable, convert to double, and store in a QVector
+            stream >> qsDate;
+            tempDate = QDateTime::fromString(qsDate, "MM/dd/yyyy,hh:mm");
+            m_qvDates.append(tempDate.toTime_t());
+            stream >> qsQ;
+            m_qvDischarge.append(qsQ.toDouble());
+            stream >> qsDSWE;
+            stream >> qsImport;
+            m_qvSediment.append(qsImport.toDouble());
+
+            //Each line represents 1 model iteration, increment model iterations after each line is read
+            //qDebug()<<date[nIterations]<<" "<<q[nIterations]<<" "<<dswe[nIterations]<<" "<<import[nIterations];
+            count++;
+        }
+    }
+
+    return PROCESS_OK;
+}
+
 int Viewer_MainWindow::loadXML()
 {
     m_xmlDoc.loadDocument(m_xmlFilename, 2);
     updateNumEvents(m_xmlDoc.readNodeData("Events").toInt());
+
+    m_qsHydro = m_xmlDoc.readNodeData("InputHydroSedi");
 
     return PROCESS_OK;
 }
@@ -48,6 +88,7 @@ void Viewer_MainWindow::readEventData(int nEvent)
 
     m_qvPngPaths.append(m_xmlDoc.readNodeData(eventName, "HillshadePath"));
     m_qvPngPaths.append(m_xmlDoc.readNodeData(eventName, "WaterDepthPath"));
+    m_qvPngPaths.append(m_xmlDoc.readNodeData(eventName, "DoDRecentPath"));
     m_qvPngPaths.append(m_xmlDoc.readNodeData(eventName, "DoDCumulativePath"));
 
     m_qvEventVols.append(m_xmlDoc.readNodeData(eventName, "ExportedSediment", "Event").toDouble());
@@ -63,7 +104,6 @@ void Viewer_MainWindow::readEventData(int nEvent)
     m_qvEventVols.append(m_xmlDoc.readNodeData(eventName, "BankDeposition", "Event").toDouble());
     m_qvTotalVols.append(m_xmlDoc.readNodeData(eventName, "BankDeposition", "Total").toDouble());
 
-    m_qvLegendPaths.resize(3);
     for  (int i=0; i<m_qvPngPaths.size(); i++)
     {
         QFileInfo fi(m_qvPngPaths[i]);
@@ -80,11 +120,34 @@ void Viewer_MainWindow::readEventData(int nEvent)
     }
 }
 
+void Viewer_MainWindow::redrawLayers()
+{
+    ui->gv_main->removeAllLayers();
+
+    if (ui->chbx_hlsd->isChecked())
+    {
+        ui->gv_main->addHlsd();
+    }
+    if (ui->chbx_depth->isChecked())
+    {
+        ui->gv_main->addDepth();
+    }
+    if (ui->chbx_dodEvent->isChecked())
+    {
+        ui->gv_main->addDoDEvent();
+    }
+    if (ui->chbx_dodTotal->isChecked())
+    {
+        ui->gv_main->addDoDTotal();
+    }
+
+    updateLegend();
+}
+
 void Viewer_MainWindow::setupGUI()
 {
-    ui->chbx_hlsd->setChecked(true);
-    ui->chbx_depth->setChecked(true);
-    ui->chbx_dod->setChecked(true);
+    m_qvLegendPaths.resize(4);
+    ui->lbl_legendTitle->setWordWrap(true);
 }
 
 void Viewer_MainWindow::setupPlots()
@@ -114,12 +177,75 @@ void Viewer_MainWindow::setupPlots()
     ui->plot_total->xAxis->setTickLabelRotation(60);
     ui->plot_total->xAxis->setSubTickCount(0);
     ui->plot_total->xAxis->setTickLength(0, 4);
-    ui->plot_total->xAxis->setRange(0, 7);
+    ui->plot_total->xAxis->setRange(0, 7); 
+}
+
+void Viewer_MainWindow::setupHydroPlot()
+{
+    //hydro plot
+    double maxQ;
+    ui->plot_hydro->addGraph();
+    ui->plot_hydro->graph(0)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssDisc, 5));
+    ui->plot_hydro->graph(0)->setLineStyle(QCPGraph::lsLine);
+    ui->plot_hydro->graph(0)->setPen(QPen(Qt::blue));
+    ui->plot_hydro->yAxis->setLabel("Discarge (cms)");
+    ui->plot_hydro->xAxis->setLabel("Date");
+
+    ui->plot_hydro->graph(0)->setData(m_qvDates, m_qvDischarge);
+    ui->plot_hydro->xAxis->setTickLabelType(QCPAxis::ltDateTime);
+    ui->plot_hydro->xAxis->setDateTimeFormat("MM/dd\nyyyy");
+    ui->plot_hydro->xAxis->setAutoTickStep(true);
+    ui->plot_hydro->xAxis->setRange(m_qvDates.first()-24*3600, m_qvDates.last()+24*3600);
+    ui->plot_hydro->yAxis->setAutoTickStep(true);
+
+    maxQ = findMaxVector(m_qvDischarge);
+
+    ui->plot_hydro->yAxis->setRange(0, maxQ + (maxQ * 0.05));
+    ui->plot_hydro->replot();
+    ui->plot_hydro->update();
 }
 
 int Viewer_MainWindow::setXmlFilename(QString filename)
 {
     m_xmlFilename = filename;
+
+    return PROCESS_OK;
+}
+
+int Viewer_MainWindow::updateLegend()
+{
+
+    QImage legendImage;
+    bool legend = false;
+
+    if (ui->chbx_dodTotal->isChecked())
+    {
+        legendImage.load(m_qvLegendPaths[3]);
+        ui->lbl_legendTitle->setText("Total Elevation Change (m)");
+        legend = true;
+    }
+    else if (ui->chbx_dodEvent->isChecked())
+    {
+        legendImage.load(m_qvLegendPaths[2]);
+        ui->lbl_legendTitle->setText("Event Elevation Change (m)");
+        legend = true;
+    }
+    else if (ui->chbx_depth->isChecked())
+    {
+        legendImage.load(m_qvLegendPaths[1]);
+        ui->lbl_legendTitle->setText("Water Depth (m)");
+        legend = true;
+    }
+
+    if (legend)
+    {
+        ui->lbl_legend->setPixmap(QPixmap::fromImage(legendImage));
+    }
+    else
+    {
+        ui->lbl_legend->clear();
+        ui->lbl_legendTitle->setText("Legend");
+    }
 
     return PROCESS_OK;
 }
@@ -176,18 +302,17 @@ int Viewer_MainWindow::updateView()
     {
         ui->gv_main->addDepth();
     }
-    if (ui->chbx_dod->isChecked())
+    if (ui->chbx_dodEvent->isChecked())
     {
-        ui->gv_main->addDoD();
+        ui->gv_main->addDoDEvent();
+    }
+    if (ui->chbx_dodTotal->isChecked())
+    {
+       ui->gv_main->addDoDTotal();
     }
 
     ui->gv_main->loadScene();
-
-    qDebug()<<"loading legend";
-    QImage legendImage;
-    legendImage.load(m_qvLegendPaths[2]);
-    ui->lbl_legend->setPixmap(QPixmap::fromImage(legendImage));
-    qDebug()<<"legend done "<<m_qvLegendPaths[2];
+    updateLegend();
 
     return PROCESS_OK;
 }
@@ -232,6 +357,10 @@ void Viewer_MainWindow::on_actionOpen_triggered()
         m_nCurrentEvent = 0;
         m_nUsBound = m_xmlDoc.readNodeData("USBound").toInt();
         ui->gv_main->align(m_nUsBound);
+        qDebug()<<"load input text";
+        loadInputText();
+        qDebug()<<"setup hydro plot";
+        setupHydroPlot();
     }
 }
 
@@ -261,12 +390,12 @@ void Viewer_MainWindow::on_tbtn_next_clicked()
     }
 }
 
-void Viewer_MainWindow::on_chbx_dod_stateChanged(int arg1)
+void Viewer_MainWindow::on_chbx_dodEvent_stateChanged(int arg1)
 {
     if (arg1 == 0)
     {
         //unchecked
-        ui->gv_main->removeDoD();
+        ui->gv_main->removeDoDEvent();
     }
     else if (arg1 == 1)
     {
@@ -275,10 +404,11 @@ void Viewer_MainWindow::on_chbx_dod_stateChanged(int arg1)
     else if (arg1 == 2)
     {
         //checked
-        ui->gv_main->addDoD();
+        redrawLayers();
     }
 
     ui->gv_main->loadScene();
+    updateLegend();
 }
 
 void Viewer_MainWindow::on_chbx_depth_stateChanged(int arg1)
@@ -295,10 +425,11 @@ void Viewer_MainWindow::on_chbx_depth_stateChanged(int arg1)
     else if (arg1 == 2)
     {
         //checked
-        ui->gv_main->addDepth();
+        redrawLayers();
     }
 
     ui->gv_main->loadScene();
+    updateLegend();
 }
 
 void Viewer_MainWindow::on_chbx_hlsd_stateChanged(int arg1)
@@ -315,8 +446,30 @@ void Viewer_MainWindow::on_chbx_hlsd_stateChanged(int arg1)
     else if (arg1 == 2)
     {
         //checked
-        ui->gv_main->addHlsd();
+        redrawLayers();
     }
 
     ui->gv_main->loadScene();
+    updateLegend();
+}
+
+void Viewer_MainWindow::on_chbx_dodTotal_stateChanged(int arg1)
+{
+    if (arg1 == 0)
+    {
+        //unchecked
+        ui->gv_main->removeDoDTotal();
+    }
+    else if (arg1 == 1)
+    {
+        //partially checked
+    }
+    else if (arg1 == 2)
+    {
+        //checked
+        redrawLayers();
+    }
+
+    ui->gv_main->loadScene();
+    updateLegend();
 }

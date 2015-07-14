@@ -21,12 +21,16 @@ public:
     ~Viewer_MainWindow();
 
     void updateNumEvents(int nEvents);
+    int loadInputText();
     int loadXML();
     void readEventData();
     void readEventData(int nEvent);
+    void redrawLayers();
     void setupGUI();
     void setupPlots();
+    void setupHydroPlot();
     int setXmlFilename(QString filename);
+    int updateLegend();
     int updatePlots();
     int updateView();
 
@@ -41,21 +45,23 @@ private slots:
 
     void on_tbtn_next_clicked();
 
-    void on_chbx_dod_stateChanged(int arg1);
+    void on_chbx_dodEvent_stateChanged(int arg1);
 
     void on_chbx_depth_stateChanged(int arg1);
 
     void on_chbx_hlsd_stateChanged(int arg1);
+
+    void on_chbx_dodTotal_stateChanged(int arg1);
 
 signals:
 
 private:
     Ui::Viewer_MainWindow *ui;
 
-    QString m_xmlFilename;
+    QString m_xmlFilename, m_qsHydro;
     XMLReadWrite m_xmlDoc;
     int m_nEvents, m_nCurrentEvent, m_nUsBound;
-    QVector<double> m_qvEventVols, m_qvTotalVols, m_qvBarTicks;
+    QVector<double> m_qvEventVols, m_qvTotalVols, m_qvBarTicks, m_qvDischarge, m_qvSediment, m_qvDates;
     QVector<QString> m_qvPngPaths, m_qvBarNames, m_qvLegendPaths;
 };
 
