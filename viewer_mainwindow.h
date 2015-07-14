@@ -22,6 +22,7 @@ public:
 
     void updateNumEvents(int nEvents);
     int loadInputText();
+    int loadInitialLayers();
     int loadXML();
     void readEventData();
     void readEventData(int nEvent);
@@ -58,7 +59,7 @@ signals:
 private:
     Ui::Viewer_MainWindow *ui;
 
-    QString m_xmlFilename, m_qsHydro;
+    QString m_xmlFilename, m_qsHydro, m_qsInitialHlsd, m_qsInitialDepth;
     XMLReadWrite m_xmlDoc;
     int m_nEvents, m_nCurrentEvent, m_nUsBound;
     QVector<double> m_qvEventVols, m_qvTotalVols, m_qvBarTicks, m_qvDischarge, m_qvSediment, m_qvDates, m_qvDateCurrent, m_qvDisMax;

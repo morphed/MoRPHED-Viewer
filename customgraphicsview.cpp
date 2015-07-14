@@ -51,6 +51,20 @@ void CustomGraphicsView::clearScene()
     m_scene->clear();
 }
 
+void CustomGraphicsView::loadDepth(QString path)
+{
+    QImage image;
+    image = QImage(path);
+    m_qgDepth = new QGraphicsPixmapItem(QPixmap::fromImage(image));
+}
+
+void CustomGraphicsView::loadHlsd(QString path)
+{
+    QImage image;
+    image = QImage(path);
+    m_qgHlsd = new QGraphicsPixmapItem(QPixmap::fromImage(image));
+}
+
 void CustomGraphicsView::loadGraphicsItems(QVector<QString> pngPaths)
 {
     QImage image;

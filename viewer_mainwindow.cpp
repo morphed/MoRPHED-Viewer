@@ -63,12 +63,39 @@ int Viewer_MainWindow::loadInputText()
     return PROCESS_OK;
 }
 
+int Viewer_MainWindow::loadInitialLayers()
+{
+    ui->gv_main->clearScene();
+
+    ui->gv_main->loadDepth(m_qsInitialDepth);
+    ui->gv_main->loadHlsd(m_qsInitialHlsd);
+
+    ui->gv_main->addHlsd();
+    ui->gv_main->addDepth();
+
+    ui->gv_main->loadScene();
+
+    QFileInfo fi(m_qsInitialDepth);
+    QString base = fi.baseName() + "_legend.png";
+    QString path = fi.absolutePath();
+    QString name = path + "/" + base;
+
+    QImage legendImage;
+    legendImage.load(name);
+    ui->lbl_legend->setPixmap(QPixmap::fromImage(legendImage));
+    ui->lbl_legendTitle->setText("Water Depth (m)");
+
+    return PROCESS_OK;
+}
+
 int Viewer_MainWindow::loadXML()
 {
     m_xmlDoc.loadDocument(m_xmlFilename, 2);
     updateNumEvents(m_xmlDoc.readNodeData("Events").toInt());
 
     m_qsHydro = m_xmlDoc.readNodeData("InputHydroSedi");
+    m_qsInitialDepth = m_xmlDoc.readNodeData("InitialDepth");
+    m_qsInitialHlsd = m_xmlDoc.readNodeData("InitialHillshade");
 
     return PROCESS_OK;
 }
@@ -374,10 +401,9 @@ void Viewer_MainWindow::on_actionOpen_triggered()
         m_nCurrentEvent = 0;
         m_nUsBound = m_xmlDoc.readNodeData("USBound").toInt();
         ui->gv_main->align(m_nUsBound);
-        qDebug()<<"load input text";
         loadInputText();
-        qDebug()<<"setup hydro plot";
         setupHydroPlot();
+        loadInitialLayers();
     }
 }
 
@@ -387,14 +413,15 @@ void Viewer_MainWindow::on_spinInt_event_valueChanged(int arg1)
     if (arg1 > 0)
     {
         m_qvDateCurrent[0] = m_qvDates[arg1-1], m_qvDateCurrent[1] = m_qvDates[arg1-1];
+        readEventData();
+        updateView();
+        updatePlots();
     }
     else
     {
         m_qvDateCurrent[0] = 0, m_qvDateCurrent[1] = 0;
+        loadInitialLayers();
     }
-    readEventData();
-    updateView();
-    updatePlots();
 }
 
 void Viewer_MainWindow::on_tbtn_prev_clicked()

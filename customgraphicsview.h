@@ -16,6 +16,8 @@ public:
     void addHlsd();
     void align(int nUsBound);
     void clearScene();
+    void loadDepth(QString path);
+    void loadHlsd(QString path);
     void loadGraphicsItems(QVector<QString> pngPaths);
     void loadScene();
     void removeAllLayers();
