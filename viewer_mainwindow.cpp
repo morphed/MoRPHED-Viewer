@@ -193,6 +193,7 @@ void Viewer_MainWindow::setupPlots()
     ui->plot_event->xAxis->setSubTickCount(0);
     ui->plot_event->xAxis->setTickLength(0, 4);
     ui->plot_event->xAxis->setRange(0, 7);
+    ui->plot_event->yAxis->setLabel("Cubic Meters");
 
     //total plot
     ui->plot_total->plotLayout()->insertRow(0);
@@ -205,6 +206,11 @@ void Viewer_MainWindow::setupPlots()
     ui->plot_total->xAxis->setSubTickCount(0);
     ui->plot_total->xAxis->setTickLength(0, 4);
     ui->plot_total->xAxis->setRange(0, 7); 
+    ui->plot_total->yAxis->setLabel("Cubic Meters");
+
+    //hydro plot
+    ui->plot_hydro->yAxis->setLabel("Discharge (cms)");
+    ui->plot_hydro->xAxis->setLabel("Date");
 }
 
 void Viewer_MainWindow::setupHydroPlot()
@@ -215,7 +221,7 @@ void Viewer_MainWindow::setupHydroPlot()
     ui->plot_hydro->graph(0)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssDisc, 5));
     ui->plot_hydro->graph(0)->setLineStyle(QCPGraph::lsLine);
     ui->plot_hydro->graph(0)->setPen(QPen(Qt::blue));
-    ui->plot_hydro->yAxis->setLabel("Discarge (cms)");
+    ui->plot_hydro->yAxis->setLabel("Discharge (cms)");
     ui->plot_hydro->xAxis->setLabel("Date");
 
     ui->plot_hydro->graph(0)->setData(m_qvDates, m_qvDischarge);
